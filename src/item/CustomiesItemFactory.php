@@ -91,6 +91,11 @@ final class CustomiesItemFactory {
 				)
 			);
 		}
+        $this->itemRegisteredList[] = [
+            "id" => $itemId,
+            "id_string" => $identifier,
+            "item" => $item
+        ];
 
 		$this->itemTableEntries[$identifier] = new ItemTypeEntry($identifier, $itemId, $componentBased);
 		CreativeInventory::getInstance()->add($item);

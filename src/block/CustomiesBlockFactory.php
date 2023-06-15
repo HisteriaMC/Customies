@@ -84,7 +84,6 @@ final class CustomiesBlockFactory {
 	public function registerBlock(Closure $blockFunc, string $identifier, ?Model $model = null, ?CreativeInventoryInfo $creativeInfo = null, ?Closure $serializer = null, ?Closure $deserializer = null): void {
 		$id = $this->getNextAvailableId($identifier);
 		$block = $blockFunc($id);
-        $id = $block->getTypeId();
 		if(!$block instanceof Block) {
 			throw new InvalidArgumentException("Class returned from closure is not a Block");
 		}
