@@ -56,9 +56,10 @@ trait ItemComponentsTrait {
         if (!is_null($player)) {
             $resolution = $player->getTextureResolution($this);
             if ($resolution !== 16) {
+                var_dump(method_exists($this, 'isHandEquipped'));
                 $this->setupRenderOffsets(
                     $resolution, $resolution,
-                    method_exists($this, 'isHandEquiped') && $this->isHandEquiped()
+                    method_exists($this, 'isHandEquipped') && $this->isHandEquipped()
                 );
             }
         }

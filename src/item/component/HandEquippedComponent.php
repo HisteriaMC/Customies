@@ -8,6 +8,7 @@ final class HandEquippedComponent implements ItemComponent {
 	private bool $handEquipped;
 
 	public function __construct(bool $handEquipped = true) {
+        var_dump("new hand equipped component ", $handEquipped);
 		$this->handEquipped = $handEquipped;
 	}
 
