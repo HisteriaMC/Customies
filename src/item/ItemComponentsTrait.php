@@ -8,6 +8,7 @@ use customiesdevs\customies\item\component\ArmorComponent;
 use customiesdevs\customies\item\component\CooldownComponent;
 use customiesdevs\customies\item\component\CreativeCategoryComponent;
 use customiesdevs\customies\item\component\CreativeGroupComponent;
+use customiesdevs\customies\item\component\DestroyCreativeItemComponent;
 use customiesdevs\customies\item\component\DisplayNameComponent;
 use customiesdevs\customies\item\component\DurabilityComponent;
 use customiesdevs\customies\item\component\FoodComponent;
@@ -23,12 +24,14 @@ use customiesdevs\customies\item\component\UseAnimationComponent;
 use customiesdevs\customies\item\component\UseDurationComponent;
 use customiesdevs\customies\item\component\WearableComponent;
 use customiesdevs\customies\util\NBT;
+use minicore\CustomPlayer;
 use pocketmine\entity\Consumable;
 use pocketmine\inventory\ArmorInventory;
 use pocketmine\item\Armor;
 use pocketmine\item\Durable;
 use pocketmine\item\Food;
 use pocketmine\item\ProjectileItem;
+use pocketmine\item\Sword;
 use pocketmine\nbt\tag\CompoundTag;
 use RuntimeException;
 
@@ -45,9 +48,22 @@ trait ItemComponentsTrait {
 		return isset($this->components[$name]);
 	}
 
-	public function getComponents(): CompoundTag {
+	public function getComponents(?CustomPlayer $player = null): CompoundTag {
 		$components = CompoundTag::create();
 		$properties = CompoundTag::create();
+        $oldComponents = $this->components;
+
+        if (!is_null($player)) {
+            $resolution = $player->getTextureResolution($this);
+            if ($resolution !== 16) {
+                var_dump(method_exists($this, 'isHandEquipped'));
+                $this->setupRenderOffsets(
+                    $resolution, $resolution,
+                    method_exists($this, 'isHandEquipped') && $this->isHandEquipped()
+                );
+            }
+        }
+
 		foreach($this->components as $component){
 			$tag = NBT::getTagType($component->getValue());
 			if($tag === null) {
@@ -59,9 +75,10 @@ trait ItemComponentsTrait {
 			}
 			$components->setTag($component->getName(), $tag);
 		}
-		$components->setTag("item_properties", $properties);
+
+        $this->components = $oldComponents; //rollback if player based calculation changes were made
 		return CompoundTag::create()
-			->setTag("components", $components);
+			->setTag("components", $components->setTag("item_properties", $properties));
 	}
 
 	/**
@@ -110,6 +127,10 @@ trait ItemComponentsTrait {
 		if($this->getFuelTime() > 0) {
 			$this->addComponent(new FuelComponent($this->getFuelTime()));
 		}
+
+        if (!$this instanceof Sword) {
+            $this->addComponent(new DestroyCreativeItemComponent(false));
+        }
 	}
 
 	/**

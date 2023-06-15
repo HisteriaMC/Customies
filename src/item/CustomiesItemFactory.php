@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace customiesdevs\customies\item;
 
 use InvalidArgumentException;
+use minicore\CustomPlayer;
 use pocketmine\block\Block;
 use pocketmine\data\bedrock\item\SavedItemData;
 use pocketmine\inventory\CreativeInventory;
@@ -24,20 +25,22 @@ use function array_values;
 final class CustomiesItemFactory {
 	use SingletonTrait;
 
-	/**
-	 * @var ItemTypeEntry[]
-	 */
+	/** @var ItemTypeEntry[] */
 	private array $itemTableEntries = [];
-	/**
-	 * @var ItemComponentPacketEntry[]
-	 */
+	/** @var ItemComponentPacketEntry[] */
 	private array $itemComponentEntries = [];
+    /**
+     * Identifier in first key of the array and item object in the second
+     * @var array<array{id: int, id_string: string, item: Item}> $itemRegisteredList
+     */
+    private array $itemRegisteredList = [];
 
 	/**
 	 * Get a custom item from its identifier. An exception will be thrown if the item is not registered.
 	 */
 	public function get(string $identifier, int $amount = 1): Item {
 		$item = StringToItemParser::getInstance()->parse($identifier);
+
 		if($item === null) {
 			throw new InvalidArgumentException("Custom item " . $identifier . " is not registered");
 		}
@@ -48,8 +51,8 @@ final class CustomiesItemFactory {
 	 * Returns the item properties CompoundTag which maps out all custom item properties.
 	 * @return ItemComponentPacketEntry[]
 	 */
-	public function getItemComponentEntries(): array {
-		return $this->itemComponentEntries;
+	public function getItemComponentEntries(?CustomPlayer $player = null): array {
+		return is_null($player) ? $this->itemComponentEntries : $this->regenerateItemComponents($player);
 	}
 
 	/**
@@ -60,18 +63,19 @@ final class CustomiesItemFactory {
 		return array_values($this->itemTableEntries);
 	}
 
-	/**
-	 * Registers the item to the item factory and assigns it an ID. It also updates the required mappings and stores the
-	 * item components if present.
-	 * @phpstan-param class-string $className
-	 */
-	public function registerItem(string $className, string $identifier, string $name): void {
-		if($className !== Item::class) {
-			Utils::testValidInstance($className, Item::class);
-		}
+    /**
+     * Registers the item to the item factory and assigns it an ID. It also updates the required mappings and stores the
+     * item components if present.
+     * @phpstan-param class-string $className
+     */
+    public function registerItem(Item $item, string $identifier): void
+    {
+        /*if ($className !== Item::class)
+            Utils::testValidInstance($className, Item::class);
 
-		$itemId = ItemTypeIds::newId();
-		$item = new $className(new ItemIdentifier($itemId), $name);
+        $itemId = Cache::getInstance()->getNextAvailableItemID($identifier);
+        $item = new $className(new ItemIdentifier($itemId), $name);*/
+        $itemId = $item->getTypeId();
 		$this->registerCustomItemMapping($identifier, $itemId);
 
 		GlobalItemDataHandlers::getDeserializer()->map($identifier, fn() => clone $item);
@@ -91,6 +95,25 @@ final class CustomiesItemFactory {
 		$this->itemTableEntries[$identifier] = new ItemTypeEntry($identifier, $itemId, $componentBased);
 		CreativeInventory::getInstance()->add($item);
 	}
+
+    public function regenerateItemComponents(CustomPlayer $player): array {
+        $itemComponentEntries = [];
+        foreach ($this->itemRegisteredList as $item) {
+            $itemObject = $item["item"];
+            $itemId = $item["id"];
+            $identifier = $item["id_string"];
+
+            if($itemObject instanceof ItemComponents) {
+                $itemComponentEntries[$identifier] = new ItemComponentPacketEntry($identifier,
+                    new CacheableNbt($itemObject->getComponents($player)
+                        ->setInt("id", $itemId)
+                        ->setString("name", $identifier)
+                    )
+                );
+            }
+        }
+        return $itemComponentEntries;
+    }
 
 	/**
 	 * Registers a custom item ID to the required mappings in the global ItemTypeDictionary instance.

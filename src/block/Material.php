@@ -23,7 +23,7 @@ final class Material {
 	public function __construct(
 		private readonly string $target,
 		private readonly string $texture,
-		private readonly string $renderMethod,
+		private readonly string $renderMethod = self::RENDER_METHOD_ALPHA_TEST,
 		private readonly bool   $faceDimming = true,
 		private readonly bool   $ambientOcclusion = true
 	) { }

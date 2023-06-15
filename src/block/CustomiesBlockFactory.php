@@ -19,6 +19,7 @@ use pocketmine\data\bedrock\block\BlockStateData;
 use pocketmine\data\bedrock\block\convert\BlockStateReader;
 use pocketmine\data\bedrock\block\convert\BlockStateWriter;
 use pocketmine\inventory\CreativeInventory;
+use pocketmine\item\StringToItemParser;
 use pocketmine\nbt\tag\CompoundTag;
 use pocketmine\nbt\tag\ListTag;
 use pocketmine\network\mcpe\protocol\types\BlockPaletteEntry;
@@ -47,11 +48,11 @@ final class CustomiesBlockFactory {
 	 * It is especially important for the workers that deal with chunk encoding, as using the wrong runtime ID mappings
 	 * can result in massive issues with almost every block showing as the wrong thing and causing lag to clients.
 	 */
-	public function addWorkerInitHook(string $cachePath): void {
+    public function addWorkerInitHook(string $cachePath): void {
 		$server = Server::getInstance();
 		$blocks = $this->blockFuncs;
 		$server->getAsyncPool()->addWorkerStartHook(static function (int $worker) use ($cachePath, $server, $blocks): void {
-			$server->getAsyncPool()->submitTaskToWorker(new AsyncRegisterBlocksTask($cachePath, $blocks), $worker);
+            $server->getAsyncPool()->submitTaskToWorker(new AsyncRegisterBlocksTask($cachePath, $blocks), $worker);
 		});
 	}
 
@@ -83,12 +84,13 @@ final class CustomiesBlockFactory {
 	public function registerBlock(Closure $blockFunc, string $identifier, ?Model $model = null, ?CreativeInventoryInfo $creativeInfo = null, ?Closure $serializer = null, ?Closure $deserializer = null): void {
 		$id = $this->getNextAvailableId($identifier);
 		$block = $blockFunc($id);
+        $id = $block->getTypeId();
 		if(!$block instanceof Block) {
 			throw new InvalidArgumentException("Class returned from closure is not a Block");
 		}
 
 		RuntimeBlockStateRegistry::getInstance()->register($block);
-		CustomiesItemFactory::getInstance()->registerBlockItem($identifier, $block);
+        CustomiesItemFactory::getInstance()->registerBlockItem($identifier, $block);
 		$this->customBlocks[$identifier] = $block;
 
 		$propertiesTag = CompoundTag::create();
