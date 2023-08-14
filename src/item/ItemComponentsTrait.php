@@ -127,9 +127,7 @@ trait ItemComponentsTrait {
 			$this->addComponent(new FuelComponent($this->getFuelTime()));
 		}
 
-        if (!$this instanceof Sword) {
-            $this->addComponent(new DestroyCreativeItemComponent(false));
-        }
+        $this->addComponent(new DestroyCreativeItemComponent(!$this instanceof Sword));
 	}
 
 	/**
