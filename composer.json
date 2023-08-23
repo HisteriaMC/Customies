@@ -1,0 +1,11 @@
+{
+    "name": "histeriamc/customies",
+    "description": "Customies fork for pmmp",
+    "type": "library",
+    "authors": [
+        {
+            "name": "dadodasyra"
+        }
+    ],
+    "require": {}
+}
