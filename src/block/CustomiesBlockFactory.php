@@ -10,7 +10,6 @@ use customiesdevs\customies\block\permutations\Permutations;
 use customiesdevs\customies\item\CreativeInventoryInfo;
 use customiesdevs\customies\item\CustomiesItemFactory;
 use customiesdevs\customies\task\AsyncRegisterBlocksTask;
-use customiesdevs\customies\util\Cache;
 use customiesdevs\customies\util\NBT;
 use InvalidArgumentException;
 use pocketmine\block\Block;
@@ -77,13 +76,12 @@ final class CustomiesBlockFactory {
 	/**
 	 * Register a block to the BlockFactory and all the required mappings. A custom stateReader and stateWriter can be
 	 * provided to allow for custom block state serialization.
-	 * @phpstan-param (Closure(int): Block) $blockFunc
+	 * @phpstan-param (Closure(): Block) $blockFunc
 	 * @phpstan-param null|(Closure(BlockStateWriter): Block) $serializer
 	 * @phpstan-param null|(Closure(Block): BlockStateReader) $deserializer
 	 */
 	public function registerBlock(Closure $blockFunc, string $identifier, ?Model $model = null, ?CreativeInventoryInfo $creativeInfo = null, ?Closure $serializer = null, ?Closure $deserializer = null): void {
-		$id = $this->getNextAvailableId($identifier);
-		$block = $blockFunc($id);
+		$block = $blockFunc();
 		if(!$block instanceof Block) {
 			throw new InvalidArgumentException("Class returned from closure is not a Block");
 		}
@@ -96,17 +94,12 @@ final class CustomiesBlockFactory {
 		$components = CompoundTag::create()
 			->setTag("minecraft:light_emission", CompoundTag::create()
 				->setByte("emission", $block->getLightLevel()))
-			->setTag("minecraft:block_light_filter", CompoundTag::create()
+			->setTag("minecraft:light_dampening", CompoundTag::create()
 				->setByte("lightLevel", $block->getLightFilter()))
 			->setTag("minecraft:destructible_by_mining", CompoundTag::create()
 				->setFloat("value", $block->getBreakInfo()->getHardness()))
-			->setTag("minecraft:destructible_by_explosion", CompoundTag::create()
-				->setFloat("value", $block->getBreakInfo()->getBlastResistance()))
 			->setTag("minecraft:friction", CompoundTag::create()
-				->setFloat("value", 1 - $block->getFrictionFactor()))
-			->setTag("minecraft:flammable", CompoundTag::create()
-				->setInt("catch_chance_modifier", $block->getFlameEncouragement())
-				->setInt("destroy_chance_modifier", $block->getFlammability()));
+				->setFloat("value", 1 - $block->getFrictionFactor()));
 
 		if($model !== null) {
 			foreach($model->toNBT() as $tagName => $tag){
@@ -180,18 +173,9 @@ final class CustomiesBlockFactory {
 				->setString("group", $creativeInfo->getGroup() ?? ""))
 			->setInt("molangVersion", 1);
 
-		if(Cache::getInstance()->isMainThread()){
-			CreativeInventory::getInstance()->add($block->asItem());
-		}
+		CreativeInventory::getInstance()->add($block->asItem());
 
 		$this->blockPaletteEntries[] = new BlockPaletteEntry($identifier, new CacheableNbt($propertiesTag));
 		$this->blockFuncs[$identifier] = [$blockFunc, $serializer, $deserializer];
-	}
-
-	/**
-	 * Returns the next available custom block id
-	 */
-	private function getNextAvailableId(string $identifier): int {
-		return Cache::getInstance()->getNextAvailableBlockID($identifier);
 	}
 }
