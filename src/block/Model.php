@@ -14,18 +14,23 @@ final class Model {
 	/** @var Material[] */
 	private array $materials;
 	private ?string $geometry;
-	private Vector3 $origin;
-	private Vector3 $size;
+	private Vector3 $originCollision;
+	private Vector3 $sizeCollision;
+    private Vector3 $originSelection;
+    private Vector3 $sizeSelection;
     private bool $collidable;
 
 	/**
 	 * @param Material[] $materials
 	 */
-	public function __construct(array $materials, ?string $geometry, ?Vector3 $origin = null, ?Vector3 $size = null, bool $collidable = true) {
+	public function __construct(array $materials, ?string $geometry, ?Vector3 $originCollision = null, ?Vector3 $sizeCollision = null,
+                                ?Vector3 $originSelection = null, ?Vector3 $sizeSelection = null, bool $collidable = true) {
 		$this->materials = $materials;
 		$this->geometry = $geometry;
-		$this->origin = $origin ?? new Vector3(-8, 0, -8); // must be in the range (-8, 0, -8) to (8, 16, 8), inclusive.
-		$this->size = $size ?? new Vector3(16, 16, 16); // must be in the range (-8, 0, -8) to (8, 16, 8), inclusive.
+		$this->originCollision = $originCollision ?? new Vector3(-8, 0, -8); // must be in the range (-8, 0, -8) to (8, 16, 8), inclusive.
+		$this->sizeCollision = $sizeCollision ?? new Vector3(16, 16, 16); // must be in the range (-8, 0, -8) to (8, 16, 8), inclusive.
+        $this->originSelection = $originSelection ?? $originCollision ?? new Vector3(-8, 0, -8); // must be in the range (-8, 0, -8) to (8, 16, 8), inclusive.
+        $this->sizeSelection = $sizeSelection ?? $sizeCollision ?? new Vector3(16, 16, 16); // must be in the range (-8, 0, -8) to (8, 16, 8), inclusive.
         $this->collidable = $collidable;
 	}
 
@@ -49,31 +54,32 @@ final class Model {
 		} else {
             $material["minecraft:geometry"] = CompoundTag::create()
                 ->setString("identifier", $this->geometry);
-            $material["minecraft:collision_box"] = $this->collidable ? CompoundTag::create()
-                ->setByte("enabled", 1)
+            $material["minecraft:collision_box"] = CompoundTag::create()
+                ->setByte("enabled", $this->collidable ? 1 : 0)
                 ->setTag("origin", new ListTag([
-                    new FloatTag($this->origin->getX()),
-                    new FloatTag($this->origin->getY()),
-                    new FloatTag($this->origin->getZ())
+                    new FloatTag($this->originCollision->getX()),
+                    new FloatTag($this->originCollision->getY()),
+                    new FloatTag($this->originCollision->getZ())
                 ]))
                 ->setTag("size", new ListTag([
-                    new FloatTag($this->size->getX()),
-                    new FloatTag($this->size->getY()),
-                    new FloatTag($this->size->getZ())
-                ])) : new ByteTag(0); //0 = false, no collissions
-            $material["minecraft:selection_box"] = $this->collidable ? CompoundTag::create()
+                    new FloatTag($this->sizeCollision->getX()),
+                    new FloatTag($this->sizeCollision->getY()),
+                    new FloatTag($this->sizeCollision->getZ())
+                ]));
+            $material["minecraft:selection_box"] = CompoundTag::create()
                 ->setByte("enabled", 1)
                 ->setTag("origin", new ListTag([
-                    new FloatTag($this->origin->getX()),
-                    new FloatTag($this->origin->getY()),
-                    new FloatTag($this->origin->getZ())
+                    new FloatTag($this->originSelection->getX()),
+                    new FloatTag($this->originSelection->getY()),
+                    new FloatTag($this->originSelection->getZ())
                 ]))
                 ->setTag("size", new ListTag([
-                    new FloatTag($this->size->getX()),
-                    new FloatTag($this->size->getY()),
-                    new FloatTag($this->size->getZ())
-                ])) : new ByteTag(0);
+                    new FloatTag($this->sizeSelection->getX()),
+                    new FloatTag($this->sizeSelection->getY()),
+                    new FloatTag($this->sizeSelection->getZ())
+                ]));
 		}
+
 		return $material;
 	}
 }
