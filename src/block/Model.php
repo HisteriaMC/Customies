@@ -49,36 +49,38 @@ final class Model {
 				->setTag("mappings", CompoundTag::create()) // What is this? The client will crash if it is not sent.
 				->setTag("materials", $materials),
 		];
-		if($this->geometry === null) {
-			$material["minecraft:unit_cube"] = CompoundTag::create();
-		} else {
+
+        if ($this->geometry === null) {
+            $material["minecraft:unit_cube"] = CompoundTag::create();
+        } else {
             $material["minecraft:geometry"] = CompoundTag::create()
                 ->setString("identifier", $this->geometry);
-            $material["minecraft:collision_box"] = CompoundTag::create()
-                ->setByte("enabled", $this->collidable ? 1 : 0)
-                ->setTag("origin", new ListTag([
-                    new FloatTag($this->originCollision->getX()),
-                    new FloatTag($this->originCollision->getY()),
-                    new FloatTag($this->originCollision->getZ())
-                ]))
-                ->setTag("size", new ListTag([
-                    new FloatTag($this->sizeCollision->getX()),
-                    new FloatTag($this->sizeCollision->getY()),
-                    new FloatTag($this->sizeCollision->getZ())
-                ]));
-            $material["minecraft:selection_box"] = CompoundTag::create()
-                ->setByte("enabled", 1)
-                ->setTag("origin", new ListTag([
-                    new FloatTag($this->originSelection->getX()),
-                    new FloatTag($this->originSelection->getY()),
-                    new FloatTag($this->originSelection->getZ())
-                ]))
-                ->setTag("size", new ListTag([
-                    new FloatTag($this->sizeSelection->getX()),
-                    new FloatTag($this->sizeSelection->getY()),
-                    new FloatTag($this->sizeSelection->getZ())
-                ]));
-		}
+        }
+
+        $material["minecraft:collision_box"] = CompoundTag::create()
+            ->setByte("enabled", $this->collidable ? 1 : 0)
+            ->setTag("origin", new ListTag([
+                new FloatTag($this->originCollision->getX()),
+                new FloatTag($this->originCollision->getY()),
+                new FloatTag($this->originCollision->getZ())
+            ]))
+            ->setTag("size", new ListTag([
+                new FloatTag($this->sizeCollision->getX()),
+                new FloatTag($this->sizeCollision->getY()),
+                new FloatTag($this->sizeCollision->getZ())
+            ]));
+        $material["minecraft:selection_box"] = CompoundTag::create()
+            ->setByte("enabled", 1)
+            ->setTag("origin", new ListTag([
+                new FloatTag($this->originSelection->getX()),
+                new FloatTag($this->originSelection->getY()),
+                new FloatTag($this->originSelection->getZ())
+            ]))
+            ->setTag("size", new ListTag([
+                new FloatTag($this->sizeSelection->getX()),
+                new FloatTag($this->sizeSelection->getY()),
+                new FloatTag($this->sizeSelection->getZ())
+            ]));
 
 		return $material;
 	}
