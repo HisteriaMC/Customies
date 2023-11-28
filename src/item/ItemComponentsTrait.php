@@ -58,7 +58,7 @@ trait ItemComponentsTrait {
             $resolution = $player->getTextureResolution($this);
             if ($resolution !== 16) {
                 $this->setupRenderOffsets(
-                    $resolution, $resolution,
+                    $resolution,
                     method_exists($this, 'isHandEquipped') && $this->isHandEquipped()
                 );
             }
@@ -138,9 +138,9 @@ trait ItemComponentsTrait {
 	 * and height of a texture to make the item scale correctly. An optional bool for hand equipped can be used if the
 	 * item is something like a tool or weapon.
 	 */
-	protected function setupRenderOffsets(int $width, int $height, bool $handEquipped = false): void {
+	protected function setupRenderOffsets(int $textureSize, bool $handEquipped = false): void {
 		$this->addComponent(new HandEquippedComponent($handEquipped));
-		$this->addComponent(new RenderOffsetsComponent($width, $height, $handEquipped));
+		$this->addComponent(new RenderOffsetsComponent($textureSize));
 	}
 
 	/**
