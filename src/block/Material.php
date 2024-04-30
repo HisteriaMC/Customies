@@ -16,7 +16,9 @@ final class Material {
 	public const TARGET_SOUTH = "south";
 	public const TARGET_WEST = "west";
 
+    //https://wiki.bedrock.dev/blocks/block-components.html#render-methods
 	public const RENDER_METHOD_ALPHA_TEST = "alpha_test";
+    public const RENDER_METHOD_DOUBLE_SIDED = "double_sided";
 	public const RENDER_METHOD_BLEND = "blend";
 	public const RENDER_METHOD_OPAQUE = "opaque";
 
