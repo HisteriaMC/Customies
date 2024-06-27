@@ -18,7 +18,6 @@ use pocketmine\data\bedrock\block\BlockStateData;
 use pocketmine\data\bedrock\block\convert\BlockStateReader;
 use pocketmine\data\bedrock\block\convert\BlockStateWriter;
 use pocketmine\inventory\CreativeInventory;
-use pocketmine\item\StringToItemParser;
 use pocketmine\nbt\tag\CompoundTag;
 use pocketmine\nbt\tag\ListTag;
 use pocketmine\network\mcpe\protocol\types\BlockPaletteEntry;
@@ -109,6 +108,11 @@ final class CustomiesBlockFactory {
 				$components->setTag($tagName, $tag);
 			}
 		}
+
+        if ($block instanceof InterfaceBlock) {
+            //Avoid placing blocks against blocks that implement InterfaceBlock
+            $components->setTag("minecraft:on_interact", CompoundTag::create());
+        }
 
 		if($block instanceof Permutable) {
 			$blockPropertyNames = $blockPropertyValues = $blockProperties = [];
