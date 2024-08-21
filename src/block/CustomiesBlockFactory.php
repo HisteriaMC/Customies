@@ -12,13 +12,13 @@ use customiesdevs\customies\item\CustomiesItemFactory;
 use customiesdevs\customies\task\AsyncRegisterBlocksTask;
 use customiesdevs\customies\util\NBT;
 use InvalidArgumentException;
-use minicore\blocks\decoration\CustomFlower;
 use pocketmine\block\Block;
 use pocketmine\block\RuntimeBlockStateRegistry;
 use pocketmine\data\bedrock\block\BlockStateData;
 use pocketmine\data\bedrock\block\convert\BlockStateReader;
 use pocketmine\data\bedrock\block\convert\BlockStateWriter;
 use pocketmine\inventory\CreativeInventory;
+use pocketmine\item\StringToItemParser;
 use pocketmine\nbt\tag\CompoundTag;
 use pocketmine\nbt\tag\ListTag;
 use pocketmine\network\mcpe\protocol\types\BlockPaletteEntry;
@@ -109,19 +109,6 @@ final class CustomiesBlockFactory {
 				$components->setTag($tagName, $tag);
 			}
 		}
-
-        if ($block instanceof InterfaceBlock) {
-            //Avoid placing blocks against blocks that implement InterfaceBlock
-            $components->setTag("minecraft:on_interact", CompoundTag::create());
-        }
-
-        if ($block instanceof CustomFlower) {
-            //I didn't manage to get it work properly but the only presence of this tag prevent placing in any case
-            //It's placed server side currently
-            //Possible fix: https://github.com/AID-LEARNING/SymplyPlugin/blob/7758dd827f1cd5886da81ded6b6ac2915cdf98e0/src/SenseiTarzan/SymplyPlugin/Behavior/blocks/component/PlacementFilterComponent.php
-            /** @see CustomFlower */
-            $components->setTag("minecraft:placement_filter", CompoundTag::create());
-        }
 
 		if($block instanceof Permutable) {
 			$blockPropertyNames = $blockPropertyValues = $blockProperties = [];

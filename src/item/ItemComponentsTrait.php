@@ -122,7 +122,7 @@ trait ItemComponentsTrait {
 		}
 
 		if($this->getName() !== "Unknown") {
-			$this->addComponent(new DisplayNameComponent("item.histeria:".$texture));
+			$this->addComponent(new DisplayNameComponent($this->getName()));
 		}
 
 		if($this->getFuelTime() > 0) {
