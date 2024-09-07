@@ -23,15 +23,17 @@ trait TogglePermutationTrait
         $permutations = [];
         foreach ([false, true] as $enabled) {
             $texture = $this->getBaseTexture() . ($enabled ? "_on" : "_off");
-            $material = new Material(Material::TARGET_ALL, $texture, Material::RENDER_METHOD_ALPHA_TEST, false, false);
+            $materials = $this->getTargetMaterial($texture);
 
-            $materials = CompoundTag::create()
-                ->setTag($material->getTarget(), $material->toNBT());
+            $materialsNbt = CompoundTag::create();
+            foreach ($materials as $material) {
+                $materialsNbt->setTag($material->getTarget(), $material->toNBT());
+            }
 
             $permutation = (new Permutation("q.block_property('histeria:toggled') == $enabled"))
                 ->withComponent("minecraft:material_instances", CompoundTag::create()
                     ->setTag("mappings", CompoundTag::create()) // What is this? The client will crash if it is not sent.
-                    ->setTag("materials", $materials));
+                    ->setTag("materials", $materialsNbt));
             $this->getAdditionalComponents($permutation, $enabled);
             $permutations[] = $permutation;
         }
@@ -67,6 +69,11 @@ trait TogglePermutationTrait
     public function isToggled(): bool
     {
         return $this->isToggled;
+    }
+
+    public function getTargetMaterial($texture): array
+    {
+        return [new Material(Material::TARGET_ALL, $texture, Material::RENDER_METHOD_ALPHA_TEST, false, false)];
     }
 
     /**
