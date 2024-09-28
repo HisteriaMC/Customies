@@ -64,6 +64,7 @@ trait TogglePermutationTrait
     public function setToggled(bool $toggled): void
     {
         $this->isToggled = $toggled;
+        $this->position->getWorld()->setBlock($this->getPosition(), $this);
     }
 
     public function isToggled(): bool
