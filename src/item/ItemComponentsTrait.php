@@ -19,7 +19,6 @@ use customiesdevs\customies\item\component\IconComponent;
 use customiesdevs\customies\item\component\ItemComponent;
 use customiesdevs\customies\item\component\MaxStackSizeComponent;
 use customiesdevs\customies\item\component\ProjectileComponent;
-use customiesdevs\customies\item\component\RenderOffsetsComponent;
 use customiesdevs\customies\item\component\ThrowableComponent;
 use customiesdevs\customies\item\component\UseAnimationComponent;
 use customiesdevs\customies\item\component\UseDurationComponent;
@@ -140,7 +139,6 @@ trait ItemComponentsTrait {
 	 */
 	protected function setupRenderOffsets(int $textureSize, bool $handEquipped = false): void {
 		$this->addComponent(new HandEquippedComponent($handEquipped));
-		$this->addComponent(new RenderOffsetsComponent($textureSize));
 	}
 
 	/**

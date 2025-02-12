@@ -189,7 +189,7 @@ final class CustomiesBlockFactory {
 				->setString("group", $creativeInfo->getGroup() ?? ""))
 			->setInt("molangVersion", 1);
 
-		CreativeInventory::getInstance()->add($block->asItem());
+		CreativeInventory::getInstance()->add($block->asItem(), 0);
 
 		$this->blockPaletteEntries[] = new BlockPaletteEntry($identifier, new CacheableNbt($propertiesTag));
 		$this->blockFuncs[$identifier] = [$blockFunc, $serializer, $deserializer];

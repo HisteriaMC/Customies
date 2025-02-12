@@ -10,15 +10,12 @@ use pocketmine\data\bedrock\item\BlockItemIdMap;
 use pocketmine\data\bedrock\item\SavedItemData;
 use pocketmine\inventory\CreativeInventory;
 use pocketmine\item\Item;
-use pocketmine\item\ItemIdentifier;
-use pocketmine\item\ItemTypeIds;
 use pocketmine\item\StringToItemParser;
+use pocketmine\nbt\tag\CompoundTag;
 use pocketmine\network\mcpe\convert\TypeConverter;
 use pocketmine\network\mcpe\protocol\types\CacheableNbt;
-use pocketmine\network\mcpe\protocol\types\ItemComponentPacketEntry;
 use pocketmine\network\mcpe\protocol\types\ItemTypeEntry;
 use pocketmine\utils\SingletonTrait;
-use pocketmine\utils\Utils;
 use pocketmine\world\format\io\GlobalItemDataHandlers;
 use ReflectionClass;
 use function array_values;
@@ -28,8 +25,7 @@ final class CustomiesItemFactory {
 
 	/** @var ItemTypeEntry[] */
 	private array $itemTableEntries = [];
-	/** @var ItemComponentPacketEntry[] */
-	private array $itemComponentEntries = [];
+
     /**
      * Identifier in first key of the array and item object in the second
      * @var array<array{id: int, id_string: string, item: Item}> $itemRegisteredList
@@ -50,10 +46,10 @@ final class CustomiesItemFactory {
 
 	/**
 	 * Returns the item properties CompoundTag which maps out all custom item properties.
-	 * @return ItemComponentPacketEntry[]
+	 * @return ItemTypeEntry[]
 	 */
 	public function getItemComponentEntries(?CustomPlayer $player = null): array {
-		return is_null($player) ? $this->itemComponentEntries : $this->regenerateItemComponents($player);
+		return is_null($player) ? $this->itemTableEntries : $this->regenerateItemComponents($player);
 	}
 
 	/**
@@ -84,22 +80,21 @@ final class CustomiesItemFactory {
 
 		StringToItemParser::getInstance()->register($identifier, fn() => clone $item);
 
-		if(($componentBased = $item instanceof ItemComponents)) {
-			$this->itemComponentEntries[$identifier] = new ItemComponentPacketEntry($identifier,
-				new CacheableNbt($item->getComponents()
-					->setInt("id", $itemId)
-					->setString("name", $identifier)
-				)
-			);
-		}
+//        $componentBased = $item instanceof ItemComponents;
+
         $this->itemRegisteredList[] = [
             "id" => $itemId,
             "id_string" => $identifier,
             "item" => $item
         ];
 
-		$this->itemTableEntries[$identifier] = new ItemTypeEntry($identifier, $itemId, $componentBased);
-		CreativeInventory::getInstance()->add($item);
+		$this->itemTableEntries[$identifier] = new ItemTypeEntry($identifier, $itemId, true, 1,
+            new CacheableNbt($item->getComponents()
+                ->setInt("id", $itemId) //TODO: is it useful to set the id here ?
+                ->setString("name", $identifier)
+            )
+        );
+		CreativeInventory::getInstance()->add($item, 0); //TODO groupId 1.21.60
 	}
 
     public function regenerateItemComponents(CustomPlayer $player): array {
@@ -110,9 +105,9 @@ final class CustomiesItemFactory {
             $identifier = $item["id_string"];
 
             if($itemObject instanceof ItemComponents) {
-                $itemComponentEntries[$identifier] = new ItemComponentPacketEntry($identifier,
+                $itemComponentEntries[$identifier] = new ItemTypeEntry($identifier, $itemId, true, 1,
                     new CacheableNbt($itemObject->getComponents($player)
-                        ->setInt("id", $itemId)
+                        ->setInt("id", $itemId) //TODO: is it useful to set the id here ?
                         ->setString("name", $identifier)
                     )
                 );
@@ -147,7 +142,7 @@ final class CustomiesItemFactory {
 		$itemId = $block->getIdInfo()->getBlockTypeId();
 		$this->registerCustomItemMapping($identifier, $itemId);
 		StringToItemParser::getInstance()->registerBlock($identifier, fn() => clone $block);
-		$this->itemTableEntries[] = new ItemTypeEntry($identifier, $itemId, false);
+		$this->itemTableEntries[] = new ItemTypeEntry($identifier, $itemId, false, 0, new CacheableNbt(new CompoundTag()));
 
 		$blockItemIdMap = BlockItemIdMap::getInstance();
 		$reflection = new ReflectionClass($blockItemIdMap);
