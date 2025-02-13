@@ -5,6 +5,7 @@ namespace customiesdevs\customies\item;
 
 use customiesdevs\customies\item\component\AllowOffHandComponent;
 use customiesdevs\customies\item\component\ArmorComponent;
+use customiesdevs\customies\item\component\AttackDamageComponent;
 use customiesdevs\customies\item\component\CanDestroyInCreativeComponent;
 use customiesdevs\customies\item\component\CooldownComponent;
 use customiesdevs\customies\item\component\CreativeCategoryComponent;
@@ -32,6 +33,7 @@ use pocketmine\item\Durable;
 use pocketmine\item\Food;
 use pocketmine\item\ProjectileItem;
 use pocketmine\item\Sword;
+use pocketmine\item\Tool;
 use pocketmine\nbt\tag\CompoundTag;
 use RuntimeException;
 
@@ -128,7 +130,16 @@ trait ItemComponentsTrait {
 			$this->addComponent(new FuelComponent($this->getFuelTime()));
 		}
 
-        $this->addComponent(new DestroyCreativeItemComponent(!$this instanceof Sword));
+		if($this->getAttackPoints() > 0) {
+			$this->addComponent(new AttackDamageComponent($this->getAttackPoints() - 1));
+		}
+
+		if($this instanceof Tool) {
+			$this->addComponent(new HandEquippedComponent());
+			if ($this instanceof Sword) {
+				$this->addComponent(new CanDestroyInCreativeComponent(false));
+			}
+		}
 	}
 
 	/**
