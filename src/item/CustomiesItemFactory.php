@@ -142,7 +142,7 @@ final class CustomiesItemFactory {
 		$itemId = $block->getIdInfo()->getBlockTypeId();
 		$this->registerCustomItemMapping($identifier, $itemId);
 		StringToItemParser::getInstance()->registerBlock($identifier, fn() => clone $block);
-		$this->itemTableEntries[] = new ItemTypeEntry($identifier, $itemId, false, 2, new CacheableNbt((new CompoundTag())));
+		$this->itemTableEntries[] = new ItemTypeEntry($identifier, $itemId, false, 2, new CacheableNbt(new CompoundTag()));
 
 		$blockItemIdMap = BlockItemIdMap::getInstance();
 		$reflection = new ReflectionClass($blockItemIdMap);
