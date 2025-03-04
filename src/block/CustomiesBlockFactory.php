@@ -18,6 +18,7 @@ use pocketmine\block\RuntimeBlockStateRegistry;
 use pocketmine\data\bedrock\block\BlockStateData;
 use pocketmine\data\bedrock\block\convert\BlockStateReader;
 use pocketmine\data\bedrock\block\convert\BlockStateWriter;
+use pocketmine\inventory\CreativeCategory;
 use pocketmine\inventory\CreativeInventory;
 use pocketmine\nbt\tag\CompoundTag;
 use pocketmine\nbt\tag\ListTag;
@@ -189,7 +190,7 @@ final class CustomiesBlockFactory {
 				->setString("group", $creativeInfo->getGroup() ?? ""))
 			->setInt("molangVersion", 1);
 
-		CreativeInventory::getInstance()->add($block->asItem(), 0);
+		CreativeInventory::getInstance()->add($block->asItem(), CreativeCategory::CONSTRUCTION); //TODO groupId 1.21.60
 
 		$this->blockPaletteEntries[] = new BlockPaletteEntry($identifier, new CacheableNbt($propertiesTag));
 		$this->blockFuncs[$identifier] = [$blockFunc, $serializer, $deserializer];

@@ -40,6 +40,7 @@ trait ItemComponentsTrait {
 
 	/** @var ItemComponent[] */
 	private array $components;
+    private CreativeInventoryInfo $creativeInfo;
 
 	public function addComponent(ItemComponent $component): void {
 		$this->components[$component->getName()] = $component;
@@ -48,6 +49,10 @@ trait ItemComponentsTrait {
 	public function hasComponent(string $name): bool {
 		return isset($this->components[$name]);
 	}
+
+    public function getCreativeInfo(): CreativeInventoryInfo {
+        return $this->creativeInfo;
+    }
 
 	public function getComponents(?CustomPlayer $player = null): CompoundTag {
 		$components = CompoundTag::create();
@@ -86,6 +91,7 @@ trait ItemComponentsTrait {
 	 */
 	protected function initComponent(string $texture, ?CreativeInventoryInfo $creativeInfo = null): void {
 		$creativeInfo ??= CreativeInventoryInfo::DEFAULT();
+        $this->creativeInfo = $creativeInfo;
 		$this->addComponent(new CreativeCategoryComponent($creativeInfo));
 		$this->addComponent(new CreativeGroupComponent($creativeInfo));
 		$this->addComponent(new CanDestroyInCreativeComponent());

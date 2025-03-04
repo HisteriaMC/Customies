@@ -8,6 +8,7 @@ use minicore\CustomPlayer;
 use pocketmine\block\Block;
 use pocketmine\data\bedrock\item\BlockItemIdMap;
 use pocketmine\data\bedrock\item\SavedItemData;
+use pocketmine\inventory\CreativeCategory;
 use pocketmine\inventory\CreativeInventory;
 use pocketmine\item\Item;
 use pocketmine\item\StringToItemParser;
@@ -94,7 +95,18 @@ final class CustomiesItemFactory {
                 ->setString("name", $identifier)
             )
         );
-		CreativeInventory::getInstance()->add($item, 0); //TODO groupId 1.21.60
+
+        if (method_exists($item, 'getCreativeInfo')) {
+            $creativeCategory = match ($item->getCreativeInfo()->getCategory()) {
+                CreativeInventoryInfo::CATEGORY_CONSTRUCTION => CreativeCategory::CONSTRUCTION,
+                CreativeInventoryInfo::CATEGORY_NATURE => CreativeCategory::NATURE,
+                CreativeInventoryInfo::CATEGORY_EQUIPMENT => CreativeCategory::EQUIPMENT,
+                default => CreativeCategory::ITEMS
+            };
+        } else $creativeCategory = CreativeCategory::ITEMS;
+
+
+		CreativeInventory::getInstance()->add($item, $creativeCategory); //TODO groupId 1.21.60
 	}
 
     public function regenerateItemComponents(CustomPlayer $player): array {
